@@ -12,7 +12,7 @@ import { BounceLoader } from 'react-spinners';
 import clsx from 'clsx';
 import { GetDrop } from '@/queries/drop.graphql';
 
-export default function Hero() {
+export default function Header() {
   const me = useMe();
   const dropQuery = useQuery(GetDrop);
   const collection = dropQuery.data?.drop.collection;
@@ -73,7 +73,7 @@ export default function Hero() {
           </PopoverBox>
         )}
       </div>
-      <div className='w-full grid grid-cols-12  md:gap-4 lg:gap-12 mt-4 md:mt-10 lg:mt-16'>
+      {/* <div className='w-full grid grid-cols-12  md:gap-4 lg:gap-12 mt-4 md:mt-10 lg:mt-16'>
         <div className='col-span-12 md:col-span-6'>
           {dropQuery.loading ? (
             <div className='w-full aspect-square rounded-lg bg-contrast animate-pulse' />
@@ -87,7 +87,7 @@ export default function Hero() {
             </div>
           )}
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

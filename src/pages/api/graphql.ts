@@ -1,7 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
-import { join } from 'node:path';
 import db from '@/modules/db';
 import {
   MintDropInput,
@@ -17,6 +16,7 @@ import { MintNft } from '@/mutations/drop.graphql';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
 import { GetProjectDrop } from '@/queries/project.graphql';
+import { GetCustomerCollections } from '@/queries/customer.graphql';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';

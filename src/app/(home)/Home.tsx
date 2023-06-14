@@ -1,6 +1,6 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import Hero from '../../components/Hero';
+import Header from '../../components/Header';
 import Tabs from '../../layouts/Tabs';
 import { cloneElement } from 'react';
 
@@ -9,7 +9,7 @@ export default function Home({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Hero />
+      <Header />
       <Tabs.Page className='mt-8'>
         <Tabs.Panel>
           <Tabs.Tab name='Drop' href='/' active={pathname === '/'} />

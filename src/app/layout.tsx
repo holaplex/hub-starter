@@ -20,7 +20,6 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
-
   const me = await userSource.get(session?.user?.email);
 
   return (
