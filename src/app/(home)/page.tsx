@@ -1,39 +1,37 @@
 'use client';
-import Image from 'next/image';
-import { useMemo } from 'react';
-import { Holder } from '@/graphql.types';
-import { shorten } from '../modules/wallet';
-import { MintDrop } from '@/mutations/mint.graphql';
 import { useMutation, useQuery } from '@apollo/client';
-import { GetDrop } from '@/queries/drop.graphql';
-import BounceLoader from 'react-spinners/BounceLoader';
 import Link from 'next/link';
-import clsx from 'clsx';
-import { isNil, not, pipe } from 'ramda';
-import useMe from '@/hooks/useMe';
-import { Session } from 'next-auth';
 import { CheckIcon } from '@heroicons/react/24/solid';
+import { shorten } from '../../modules/wallet';
+import { GetDrop } from '@/queries/drop.graphql';
+import useMe from '../../hooks/useMe';
+import { useMemo } from 'react';
+import { Holder } from '../../graphql.types';
+import { isNil, not, pipe } from 'ramda';
 import { toast } from 'react-toastify';
+import { MintDrop } from '@/mutations/mint.graphql';
+import { BounceLoader } from 'react-spinners';
+import clsx from 'clsx';
 
 interface MintData {
   mint: string;
 }
 
-interface HomeProps {
-  session?: Session | null;
-}
-
-export default function Home({ session }: HomeProps) {
-  const me = useMe();
+export default async function DropPage() {
   const dropQuery = useQuery(GetDrop);
+  const me = useMe();
+
   const collection = dropQuery.data?.drop.collection;
   const metadataJson = collection?.metadataJson;
+
   const holder = useMemo(() => {
     return collection?.holders?.find(
       (holder: Holder) => holder.address === me?.wallet?.address
     );
   }, [collection?.holders, me?.wallet]);
+
   const owns = pipe(isNil, not)(holder);
+
   const [mint, { loading }] = useMutation<MintData>(MintDrop, {
     awaitRefetchQueries: true,
     refetchQueries: [
@@ -56,34 +54,7 @@ export default function Home({ session }: HomeProps) {
   };
 
   return (
-    <>
-      <div className='flex w-full justify-between items-center py-4'>
-        <Image src='/img/logo.png' alt='site logo' width={199} height={18} />
-        {!me ? (
-          <>
-            <div className='flex gap-1 md:gap-4 items-center'>
-              <Link
-                href='/login'
-                className='text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6'
-              >
-                Log in
-              </Link>
-              <span className='text-gray-300 font-medium md:hidden'>or</span>
-              <Link
-                href='/login'
-                className='text-cta font-medium md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6'
-              >
-                Sign up
-              </Link>
-            </div>
-          </>
-        ) : (
-          <button className='text-cta font-bold border-2 rounded-full border-cta py-3 px-6 flex gap-2'>
-            <img className='w-6 h-6 rounded-full' src={me?.image as string} />
-            <span>{me?.name}</span>
-          </button>
-        )}
-      </div>
+    <div className='min-w-max'>
       <div className='w-full grid grid-cols-12  md:gap-4 lg:gap-12 mt-4 md:mt-10 lg:mt-16'>
         <div className='col-span-12 md:col-span-6'>
           {dropQuery.loading ? (
@@ -139,12 +110,12 @@ export default function Home({ session }: HomeProps) {
                 </div>
                 <div className='font-bold rounded-full bg-cta text-contrast w-32 h-12 transition animate-pulse' />
               </>
-            ) : session ? (
+            ) : me ? (
               <>
                 <div className='flex flex-row items-center gap-2'>
                   <img
                     className='w-14 h-14 rounded-full'
-                    src={session?.user?.image as string}
+                    src={me?.image as string}
                   />
 
                   <div className='flex flex-col gap-1 justify-between'>
@@ -182,6 +153,6 @@ export default function Home({ session }: HomeProps) {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
