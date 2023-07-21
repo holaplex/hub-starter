@@ -29,11 +29,12 @@ export default function Home({ session }: HomeProps) {
   const dropQuery = useQuery(GetDrop);
   const collection = dropQuery.data?.drop.collection;
   const metadataJson = collection?.metadataJson;
+  const walletAddresses = me?.wallets?.map((wallet) => wallet?.address);
   const holder = useMemo(() => {
-    return collection?.holders?.find(
-      (holder: Holder) => holder.address === me?.wallet?.address
+    return collection?.holders?.find((holder: Holder) =>
+      walletAddresses?.includes(holder.address)
     );
-  }, [collection?.holders, me?.wallet]);
+  }, [collection?.holders, walletAddresses]);
   const owns = pipe(isNil, not)(holder);
   const [mint, { loading }] = useMutation<MintData>(MintDrop, {
     awaitRefetchQueries: true,
@@ -93,14 +94,23 @@ export default function Home({ session }: HomeProps) {
             }
           >
             <div className='rounded-lg bg-contrast p-6 flex flex-col items-center mt-4'>
-              <span className='text-xs text-gray-300'>
-                Solana wallet address
+              <span className='text-xs text-gray-300 underline'>
+                Wallet addresses
               </span>
-              <div className='flex gap-2 mt-1'>
-                <span className='text-xs'>
-                  {shorten(me.wallet?.address as string)}
-                </span>
-                <Copy copyString={me.wallet?.address as string} />
+
+              <div className='flex flex-col gap-2 mt-1 items-center'>
+                {me?.wallets?.map((wallet) => {
+                  return (
+                    <div key={wallet?.address} className='flex gap-2'>
+                      <span className='text-xs'>
+                        {`(${wallet?.assetId}) ${shorten(
+                          wallet?.address as string
+                        )}`}
+                      </span>
+                      <Copy copyString={wallet?.address as string} />
+                    </div>
+                  );
+                })}
               </div>
               <button
                 onClick={() => signOut()}
@@ -206,9 +216,17 @@ export default function Home({ session }: HomeProps) {
 
                     <div className='flex flex-col gap-1 justify-between'>
                       <span className='text-gray-300 text-xs'>
-                        Wallet connected
+                        Wallets connected
                       </span>
-                      <span>{shorten(me?.wallet?.address as string)}</span>
+                      {me?.wallets?.map((wallet) => {
+                        return (
+                          <span key={wallet?.address} className='text-sm'>
+                            {`(${wallet?.assetId}) ${shorten(
+                              wallet?.address as string
+                            )}`}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
 

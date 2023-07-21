@@ -4,7 +4,7 @@ declare module '*/customer.graphql' {
   const defaultDocument: DocumentNode;
   export const CreateCustomer: DocumentNode;
 export const CreateCustomerWallet: DocumentNode;
-export const GetCustomerWallet: DocumentNode;
+export const GetCustomerWallets: DocumentNode;
 export const GetCustomerTreasury: DocumentNode;
 export const GetCustomerCollections: DocumentNode;
 

@@ -7,16 +7,16 @@ schema {
   mutation: Mutation
 }
 
-type User {
+type Me {
   name: String
   email: String
   image: String
-  wallet: Wallet
+  wallets: [Wallet]
 }
 
 type Query {
   drop: Drop
-  me: User
+  me: Me
   collections: [CollectionMint]
 }
 

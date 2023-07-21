@@ -1,16 +1,13 @@
-query GetCustomerWallet(
-  $project: UUID!
-  $customer: UUID!
-  $assetType: AssetType!
-) {
+query GetCustomerWallets($project: UUID!, $customer: UUID!) {
   project(id: $project) {
     id
     customer(id: $customer) {
       id
       treasury {
         id
-        wallet(assetType: $assetType) {
+        wallets {
           address
+          assetId
         }
       }
     }

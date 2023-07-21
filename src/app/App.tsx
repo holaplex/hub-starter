@@ -3,7 +3,7 @@
 import { ApolloProvider } from '@apollo/client';
 import api from '@/modules/api';
 import MeProvider from '@/providers/MeProvider';
-import { User } from '@/graphql.types';
+import { Me } from '@/graphql.types';
 import { ToastContainer } from 'react-toastify';
 
 export default function App({
@@ -11,7 +11,7 @@ export default function App({
   me
 }: {
   children: React.ReactNode;
-  me: User | undefined;
+  me: Me | undefined;
 }) {
   return (
     <ApolloProvider client={api}>

@@ -108,28 +108,36 @@ export const authOptions: NextAuthOptions = {
         intervalBetweenAttempts: 100
       });
 
-      const createCustomerWalletResponse = await holaplex.mutate<
-        CreateCustomerWalletData,
-        CreateCustomerWalletVars
-      >({
-        mutation: CreateCustomerWallet,
-        variables: {
-          input: {
-            customer: me.holaplexCustomerId,
-            assetType: process.env.HOLAPLEX_WALLET_ASSET_TYPE as AssetType
-          }
-        }
-      });
+      const assetTypes = process.env.HOLAPLEX_WALLET_ASSET_TYPE?.split(
+        ','
+      ) as AssetType[];
 
-      const wallet =
-        createCustomerWalletResponse.data?.createCustomerWallet.wallet;
+      await Promise.all(
+        assetTypes?.map(async (assetType) => {
+          const createCustomerWalletResponse = await holaplex.mutate<
+            CreateCustomerWalletData,
+            CreateCustomerWalletVars
+          >({
+            mutation: CreateCustomerWallet,
+            variables: {
+              input: {
+                customer: me.holaplexCustomerId,
+                assetType
+              }
+            }
+          });
 
-      await db.wallet.create({
-        data: {
-          holaplexCustomerId: me.holaplexCustomerId as string,
-          address: wallet?.address as string
-        }
-      });
+          const wallet =
+            createCustomerWalletResponse.data?.createCustomerWallet.wallet;
+
+          await db.wallet.create({
+            data: {
+              holaplexCustomerId: me.holaplexCustomerId as string,
+              address: wallet?.address as string
+            }
+          });
+        })
+      );
     }
   }
 };
