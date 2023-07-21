@@ -17,6 +17,7 @@ declare module '*/drop.graphql' {
   const defaultDocument: DocumentNode;
   export const MintNft: DocumentNode;
 export const GetDrop: DocumentNode;
+export const GetDropPurchases: DocumentNode;
 
   export default defaultDocument;
 }
@@ -63,6 +64,7 @@ declare module '*/project.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;
   export const GetProjectDrop: DocumentNode;
+export const GetProjectDropPurchases: DocumentNode;
 
   export default defaultDocument;
 }

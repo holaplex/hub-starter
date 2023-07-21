@@ -11,7 +11,9 @@ import {
   CollectionMint,
   Drop,
   TransferAssetPayload,
-  TransferAssetInput
+  TransferAssetInput,
+  Blockchain,
+  AssetType
 } from '@/graphql.types';
 import { Session } from 'next-auth';
 import { MintNft } from '@/mutations/drop.graphql';
@@ -19,7 +21,10 @@ import { TransferAsset } from '@/mutations/transfer.graphql';
 
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
-import { GetProjectDrop } from '@/queries/project.graphql';
+import {
+  GetProjectDrop,
+  GetProjectDropPurchases
+} from '@/queries/project.graphql';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';
@@ -64,6 +69,18 @@ export const queryResolvers: QueryResolvers<AppContext> = {
     const { data } = await holaplex.query<GetDropData, GetDropVars>({
       fetchPolicy: 'network-only',
       query: GetProjectDrop,
+      variables: {
+        project: process.env.HOLAPLEX_PROJECT_ID as string,
+        drop: process.env.HOLAPLEX_DROP_ID as string
+      }
+    });
+
+    return data.project.drop as Drop;
+  },
+  async dropPurchases(_a, _b, { dataSources: { holaplex } }) {
+    const { data } = await holaplex.query<GetDropData, GetDropVars>({
+      fetchPolicy: 'network-only',
+      query: GetProjectDropPurchases,
       variables: {
         project: process.env.HOLAPLEX_PROJECT_ID as string,
         drop: process.env.HOLAPLEX_DROP_ID as string
@@ -130,25 +147,48 @@ interface TransferAssetVars {
 }
 
 const mutationResolvers: MutationResolvers<AppContext> = {
-  async mint(_a, _b, { session, dataSources: { db, holaplex } }) {
+  async mint(_a, _b, { session, dataSources: { db, holaplex, user } }) {
     if (!session) {
       return null;
     }
 
-    const wallet = await db.wallet.findFirst({
-      where: {
-        user: {
-          email: session?.user?.email
-        }
+    const dropResponse = await holaplex.query<GetDropData, GetDropVars>({
+      fetchPolicy: 'network-only',
+      query: GetProjectDrop,
+      variables: {
+        project: process.env.HOLAPLEX_PROJECT_ID as string,
+        drop: process.env.HOLAPLEX_DROP_ID as string
       }
     });
+
+    const blockchain = dropResponse.data.project.drop?.collection.blockchain;
+
+    const me = await user.get(session.user?.email);
+    const wallets = me?.wallets;
+
+    let assetId = '';
+    switch (blockchain) {
+      case Blockchain.Solana:
+        assetId = AssetType.Sol;
+        break;
+      case Blockchain.Polygon:
+        assetId = AssetType.Matic;
+        break;
+      case Blockchain.Ethereum:
+        assetId = AssetType.Eth;
+        break;
+    }
+
+    const recipient = wallets?.filter(
+      (wallet) => wallet?.assetId === assetId
+    )[0]?.address;
 
     const { data } = await holaplex.mutate<MintNftData, MintNftVars>({
       mutation: MintNft,
       variables: {
         input: {
           drop: process.env.HOLAPLEX_DROP_ID as string,
-          recipient: wallet?.address as string
+          recipient: recipient as string
         }
       }
     });

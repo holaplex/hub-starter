@@ -114,7 +114,7 @@ export const authOptions: NextAuthOptions = {
 
       await Promise.all(
         assetTypes?.map(async (assetType) => {
-          const createCustomerWalletResponse = await holaplex.mutate<
+          await holaplex.mutate<
             CreateCustomerWalletData,
             CreateCustomerWalletVars
           >({
@@ -124,16 +124,6 @@ export const authOptions: NextAuthOptions = {
                 customer: me.holaplexCustomerId,
                 assetType
               }
-            }
-          });
-
-          const wallet =
-            createCustomerWalletResponse.data?.createCustomerWallet.wallet;
-
-          await db.wallet.create({
-            data: {
-              holaplexCustomerId: me.holaplexCustomerId as string,
-              address: wallet?.address as string
             }
           });
         })

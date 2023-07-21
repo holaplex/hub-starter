@@ -6,6 +6,7 @@ query GetProjectDrop($project: UUID!, $drop: UUID!) {
       startTime
       endTime
       collection {
+        blockchain
         totalMints
         supply
         id
@@ -29,3 +30,18 @@ query GetProjectDrop($project: UUID!, $drop: UUID!) {
   }
 }
 
+query GetProjectDropPurchases($project: UUID!, $drop: UUID!) {
+  project(id: $project) {
+    id
+    drop(id: $drop) {
+      id
+      purchases {
+        id
+        mintId
+        dropId
+        wallet
+        status
+      }
+    }
+  }
+}

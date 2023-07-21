@@ -1,6 +1,6 @@
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { PrismaClient } from '@prisma/client';
-import { AssetType, Me, Project, User, Wallet } from '@/graphql.types';
+import { AssetType, Me, Project } from '@/graphql.types';
 import { GetCustomerWallets } from '@/queries/customer.graphql';
 
 interface GetCustomerWalletsData {
@@ -42,19 +42,11 @@ export default class UserSource {
       }
     });
 
-    const assetTypes = process.env.HOLAPLEX_WALLET_ASSET_TYPE?.split(
-      ','
-    ) as AssetType[];
-
-    const wallets = data.project.customer?.treasury?.wallets?.filter((wallet) =>
-      assetTypes.includes(wallet.assetId as AssetType)
-    );
-
     return {
       name: user?.name,
       email: user?.email,
       image: user?.image,
-      wallets: wallets
+      wallets: data.project.customer?.treasury?.wallets
     } as Me;
   }
 }

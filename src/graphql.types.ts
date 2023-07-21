@@ -1375,6 +1375,7 @@ export type Query = {
    */
   creditSheet: Array<ActionCost>;
   drop?: Maybe<Drop>;
+  dropPurchases?: Maybe<Drop>;
   /**
    * Returns a list of event types that an external service can subscribe to.
    *
@@ -2280,6 +2281,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   collections?: Resolver<Maybe<Array<Maybe<ResolversTypes['CollectionMint']>>>, ParentType, ContextType>;
   creditSheet?: Resolver<Array<ResolversTypes['ActionCost']>, ParentType, ContextType>;
   drop?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
+  dropPurchases?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
   eventTypes?: Resolver<Array<ResolversTypes['EventType']>, ParentType, ContextType>;
   invite?: Resolver<Maybe<ResolversTypes['Invite']>, ParentType, ContextType, RequireFields<QueryInviteArgs, 'id'>>;
   me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;

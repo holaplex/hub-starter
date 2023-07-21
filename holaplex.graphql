@@ -1421,6 +1421,7 @@ type Query {
   """
   creditSheet: [ActionCost!]!
   drop: Drop
+  dropPurchases: Drop
 
   """
   Returns a list of event types that an external service can subscribe to.

@@ -16,6 +16,7 @@ type Me {
 
 type Query {
   drop: Drop
+  dropPurchases: Drop
   me: Me
   collections: [CollectionMint]
 }

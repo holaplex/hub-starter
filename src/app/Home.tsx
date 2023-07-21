@@ -1,11 +1,11 @@
 'use client';
 import Image from 'next/image';
 import { useMemo } from 'react';
-import { CollectionMint, Holder } from '@/graphql.types';
+import { AssetType, CollectionMint, Holder, Purchase } from '@/graphql.types';
 import { shorten } from '../modules/wallet';
 import { MintDrop } from '@/mutations/mint.graphql';
 import { ApolloError, useMutation, useQuery } from '@apollo/client';
-import { GetDrop } from '@/queries/drop.graphql';
+import { GetDropPurchases, GetDrop } from '@/queries/drop.graphql';
 import Link from 'next/link';
 import { isNil, not, pipe } from 'ramda';
 import useMe from '@/hooks/useMe';
@@ -15,6 +15,7 @@ import { PopoverBox } from '../components/Popover';
 import { Icon } from '../components/Icon';
 import { signOut } from 'next-auth/react';
 import Copy from '../components/Copy';
+import CryptoIcon from '../components/CryptoIcon';
 
 interface MintData {
   mint: CollectionMint;
@@ -29,13 +30,17 @@ export default function Home({ session }: HomeProps) {
   const dropQuery = useQuery(GetDrop);
   const collection = dropQuery.data?.drop.collection;
   const metadataJson = collection?.metadataJson;
+
+  const dropPurchasesQuery = useQuery(GetDropPurchases);
   const walletAddresses = me?.wallets?.map((wallet) => wallet?.address);
-  const holder = useMemo(() => {
-    return collection?.holders?.find((holder: Holder) =>
-      walletAddresses?.includes(holder.address)
+
+  const purchase = useMemo(() => {
+    return dropPurchasesQuery.data?.dropPurchases.purchases?.find(
+      (purchase: Purchase) => walletAddresses?.includes(purchase.wallet)
     );
-  }, [collection?.holders, walletAddresses]);
-  const owns = pipe(isNil, not)(holder);
+  }, [dropPurchasesQuery.data?.dropPurchases.purchases, walletAddresses]);
+
+  const purchased = pipe(isNil, not)(purchase);
   const [mint, { loading }] = useMutation<MintData>(MintDrop, {
     awaitRefetchQueries: true,
     refetchQueries: [
@@ -98,15 +103,19 @@ export default function Home({ session }: HomeProps) {
                 Wallet addresses
               </span>
 
-              <div className='flex flex-col gap-2 mt-1 items-center'>
+              <div className='flex flex-col gap-2 mt-4 items-center'>
                 {me?.wallets?.map((wallet) => {
                   return (
-                    <div key={wallet?.address} className='flex gap-2'>
-                      <span className='text-xs'>
-                        {`(${wallet?.assetId}) ${shorten(
-                          wallet?.address as string
-                        )}`}
-                      </span>
+                    <div
+                      key={wallet?.address}
+                      className='flex gap-2 items-center'
+                    >
+                      <div className='flex items-center'>
+                        <CryptoIcon assetType={wallet?.assetId as AssetType} />
+                        <span className='text-xs'>
+                          {shorten(wallet?.address as string)}
+                        </span>
+                      </div>
                       <Copy copyString={wallet?.address as string} />
                     </div>
                   );
@@ -114,7 +123,7 @@ export default function Home({ session }: HomeProps) {
               </div>
               <button
                 onClick={() => signOut()}
-                className='text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6 mt-10'
+                className='text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6 mt-6'
               >
                 Log out
               </button>
@@ -191,7 +200,7 @@ export default function Home({ session }: HomeProps) {
                 <div className='font-bold rounded-full bg-backdrop w-32 h-12 transition animate-pulse' />
               </>
             ) : session ? (
-              owns ? (
+              purchased ? (
                 <div className='flex flex-row w-full items-center gap-2 justify-between'>
                   <div className='flex flex-col gap-2'>
                     <span className='text-neautraltext font-semibold'>
@@ -215,16 +224,19 @@ export default function Home({ session }: HomeProps) {
                     />
 
                     <div className='flex flex-col gap-1 justify-between'>
-                      <span className='text-gray-300 text-xs'>
+                      <span className='text-gray-300 text-xs mb-1'>
                         Wallets connected
                       </span>
                       {me?.wallets?.map((wallet) => {
                         return (
-                          <span key={wallet?.address} className='text-sm'>
-                            {`(${wallet?.assetId}) ${shorten(
-                              wallet?.address as string
-                            )}`}
-                          </span>
+                          <div key={wallet?.address} className='flex'>
+                            <CryptoIcon
+                              assetType={wallet?.assetId as AssetType}
+                            />
+                            <span className='text-sm'>
+                              {shorten(wallet?.address as string)}
+                            </span>
+                          </div>
                         );
                       })}
                     </div>
