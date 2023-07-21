@@ -30,7 +30,10 @@ import UserSource from '@/modules/user';
 import holaplex from '@/modules/holaplex';
 import { loadSchema } from '@graphql-tools/load';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { GetCustomerCollections } from '@/queries/customer.graphql';
+import {
+  GetCustomerCollections,
+  GetCustomerWallet
+} from '@/queries/customer.graphql';
 
 export interface AppContext {
   session: Session | null;
@@ -145,10 +148,27 @@ interface TransferAssetData {
 interface TransferAssetVars {
   input: TransferAssetInput;
 }
+interface GetCustomerWalletData {
+  project: Pick<Project, 'customer'>;
+}
+
+interface GetCustomerWalletVars {
+  project: string;
+  customer: string;
+  assetId: AssetType;
+}
 
 const mutationResolvers: MutationResolvers<AppContext> = {
-  async mint(_a, _b, { session, dataSources: { db, holaplex, user } }) {
+  async mint(_a, _b, { session, dataSources: { db, holaplex } }) {
     if (!session) {
+      return null;
+    }
+
+    const user = await db.user.findFirst({
+      where: { email: session.user?.email }
+    });
+
+    if (!user || !user.holaplexCustomerId) {
       return null;
     }
 
@@ -163,8 +183,8 @@ const mutationResolvers: MutationResolvers<AppContext> = {
 
     const blockchain = dropResponse.data.project.drop?.collection.blockchain;
 
-    const me = await user.get(session.user?.email);
-    const wallets = me?.wallets;
+    // const me = await user.get(session.user?.email);
+    // const wallets = me?.wallets;
 
     let assetId = '';
     switch (blockchain) {
@@ -179,9 +199,25 @@ const mutationResolvers: MutationResolvers<AppContext> = {
         break;
     }
 
-    const recipient = wallets?.filter(
-      (wallet) => wallet?.assetId === assetId
-    )[0]?.address;
+    // const recipient = wallets?.filter(
+    //   (wallet) => wallet?.assetId === assetId
+    // )[0]?.address;
+
+    const customerResponse = await holaplex.query<
+      GetCustomerWalletData,
+      GetCustomerWalletVars
+    >({
+      fetchPolicy: 'network-only',
+      query: GetCustomerWallet,
+      variables: {
+        project: process.env.HOLAPLEX_PROJECT_ID as string,
+        customer: user.holaplexCustomerId,
+        assetId: assetId as AssetType
+      }
+    });
+
+    const customerWallets = customerResponse.data.project.customer?.wallet;
+    const recipient = customerWallets ? customerWallets[0].address : null;
 
     const { data } = await holaplex.mutate<MintNftData, MintNftVars>({
       mutation: MintNft,

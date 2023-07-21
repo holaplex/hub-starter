@@ -7,6 +7,7 @@ export const CreateCustomerWallet: DocumentNode;
 export const GetCustomerWallets: DocumentNode;
 export const GetCustomerTreasury: DocumentNode;
 export const GetCustomerCollections: DocumentNode;
+export const GetCustomerWallet: DocumentNode;
 
   export default defaultDocument;
 }

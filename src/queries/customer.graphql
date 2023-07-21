@@ -50,3 +50,20 @@ query GetCustomerCollections($project: UUID!, $customer: UUID!) {
     }
   }
 }
+
+query GetCustomerWallet(
+  $project: UUID!
+  $customer: UUID!
+  $assetId: AssetType
+) {
+  project(id: $project) {
+    id
+    customer(id: $customer) {
+      id
+      wallet(assetId: $assetId) {
+        address
+        assetId
+      }
+    }
+  }
+}
