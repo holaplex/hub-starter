@@ -183,9 +183,6 @@ const mutationResolvers: MutationResolvers<AppContext> = {
 
     const blockchain = dropResponse.data.project.drop?.collection.blockchain;
 
-    // const me = await user.get(session.user?.email);
-    // const wallets = me?.wallets;
-
     let assetId = '';
     switch (blockchain) {
       case Blockchain.Solana:
@@ -198,10 +195,6 @@ const mutationResolvers: MutationResolvers<AppContext> = {
         assetId = AssetType.Eth;
         break;
     }
-
-    // const recipient = wallets?.filter(
-    //   (wallet) => wallet?.assetId === assetId
-    // )[0]?.address;
 
     const customerResponse = await holaplex.query<
       GetCustomerWalletData,
