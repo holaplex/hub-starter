@@ -7,7 +7,7 @@ import Copy from '../../components/Copy';
 import { signOut } from 'next-auth/react';
 import useMe from '../../hooks/useMe';
 import Link from 'next/link';
-import { XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import CryptoIcon from '../../components/CryptoIcon';
 
 interface GetCollectionsData {

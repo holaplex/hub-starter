@@ -36,6 +36,10 @@ query GetCustomerCollections($project: UUID!, $customer: UUID!) {
         collectionId
         createdAt
         creationStatus
+        collection {
+          id
+          blockchain
+        }
         metadataJson {
           id
           image
