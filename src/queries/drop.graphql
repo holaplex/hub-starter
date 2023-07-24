@@ -21,16 +21,3 @@ query GetDrop {
     }
   }
 }
-
-query GetDropPurchases {
-  dropPurchases {
-    id
-    purchases {
-      id
-      mintId
-      dropId
-      wallet
-      status
-    }
-  }
-}

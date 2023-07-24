@@ -1,11 +1,13 @@
 'use client';
 import Image from 'next/image';
 import { useMemo } from 'react';
-import { AssetType, CollectionMint, Holder, Purchase } from '@/graphql.types';
+import { AssetType, CollectionMint, Purchase } from '@/graphql.types';
 import { shorten } from '../modules/wallet';
 import { MintDrop } from '@/mutations/mint.graphql';
 import { ApolloError, useMutation, useQuery } from '@apollo/client';
-import { GetDropPurchases, GetDrop } from '@/queries/drop.graphql';
+import { GetDrop } from '@/queries/drop.graphql';
+import { GetCollectibleHistory } from '@/queries/collectible.graphql';
+
 import Link from 'next/link';
 import { isNil, not, pipe } from 'ramda';
 import useMe from '@/hooks/useMe';
@@ -31,14 +33,14 @@ export default function Home({ session }: HomeProps) {
   const collection = dropQuery.data?.drop.collection;
   const metadataJson = collection?.metadataJson;
 
-  const dropPurchasesQuery = useQuery(GetDropPurchases);
+  const mintHistoryQuery = useQuery(GetCollectibleHistory);
   const walletAddresses = me?.wallets?.map((wallet) => wallet?.address);
 
   const purchase = useMemo(() => {
-    return dropPurchasesQuery.data?.dropPurchases.purchases?.find(
+    return mintHistoryQuery.data?.collectible.mintHistory?.find(
       (purchase: Purchase) => walletAddresses?.includes(purchase.wallet)
     );
-  }, [dropPurchasesQuery.data?.dropPurchases.purchases, walletAddresses]);
+  }, [mintHistoryQuery.data?.collectible.mintHistory, walletAddresses]);
 
   const purchased = pipe(isNil, not)(purchase);
   const [mint, { loading }] = useMutation<MintData>(MintDrop, {

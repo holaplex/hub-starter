@@ -112,6 +112,11 @@ export type BlockchainCost = {
   credits: Scalars['Int'];
 };
 
+export type Collectible = {
+  __typename?: 'Collectible';
+  mintHistory?: Maybe<Array<Maybe<Purchase>>>;
+};
+
 export type Collection = {
   __typename?: 'Collection';
   /**
@@ -1366,6 +1371,7 @@ export type Purchase = {
 
 export type Query = {
   __typename?: 'Query';
+  collectible?: Maybe<Collectible>;
   collections?: Maybe<Array<Maybe<CollectionMint>>>;
   /**
    * Returns a list of `ActionCost` which represents the cost of each action on different blockchains.
@@ -1375,7 +1381,6 @@ export type Query = {
    */
   creditSheet: Array<ActionCost>;
   drop?: Maybe<Drop>;
-  dropPurchases?: Maybe<Drop>;
   /**
    * Returns a list of event types that an external service can subscribe to.
    *
@@ -1651,6 +1656,7 @@ export type ResolversTypes = {
   Blockchain: Blockchain;
   BlockchainCost: ResolverTypeWrapper<BlockchainCost>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Collectible: ResolverTypeWrapper<Collectible>;
   Collection: ResolverTypeWrapper<Collection>;
   CollectionCreator: ResolverTypeWrapper<CollectionCreator>;
   CollectionMint: ResolverTypeWrapper<CollectionMint>;
@@ -1757,6 +1763,7 @@ export type ResolversParentTypes = {
   Affiliation: ResolversUnionTypes['Affiliation'];
   BlockchainCost: BlockchainCost;
   Boolean: Scalars['Boolean'];
+  Collectible: Collectible;
   Collection: Collection;
   CollectionCreator: CollectionCreator;
   CollectionMint: CollectionMint;
@@ -1881,6 +1888,11 @@ export type AffiliationResolvers<ContextType = any, ParentType extends Resolvers
 export type BlockchainCostResolvers<ContextType = any, ParentType extends ResolversParentTypes['BlockchainCost'] = ResolversParentTypes['BlockchainCost']> = {
   blockchain?: Resolver<ResolversTypes['Blockchain'], ParentType, ContextType>;
   credits?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CollectibleResolvers<ContextType = any, ParentType extends ResolversParentTypes['Collectible'] = ResolversParentTypes['Collectible']> = {
+  mintHistory?: Resolver<Maybe<Array<Maybe<ResolversTypes['Purchase']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2278,10 +2290,10 @@ export type PurchaseResolvers<ContextType = any, ParentType extends ResolversPar
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  collectible?: Resolver<Maybe<ResolversTypes['Collectible']>, ParentType, ContextType>;
   collections?: Resolver<Maybe<Array<Maybe<ResolversTypes['CollectionMint']>>>, ParentType, ContextType>;
   creditSheet?: Resolver<Array<ResolversTypes['ActionCost']>, ParentType, ContextType>;
   drop?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
-  dropPurchases?: Resolver<Maybe<ResolversTypes['Drop']>, ParentType, ContextType>;
   eventTypes?: Resolver<Array<ResolversTypes['EventType']>, ParentType, ContextType>;
   invite?: Resolver<Maybe<ResolversTypes['Invite']>, ParentType, ContextType, RequireFields<QueryInviteArgs, 'id'>>;
   me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
@@ -2370,6 +2382,7 @@ export type Resolvers<ContextType = any> = {
   ActionCost?: ActionCostResolvers<ContextType>;
   Affiliation?: AffiliationResolvers<ContextType>;
   BlockchainCost?: BlockchainCostResolvers<ContextType>;
+  Collectible?: CollectibleResolvers<ContextType>;
   Collection?: CollectionResolvers<ContextType>;
   CollectionCreator?: CollectionCreatorResolvers<ContextType>;
   CollectionMint?: CollectionMintResolvers<ContextType>;

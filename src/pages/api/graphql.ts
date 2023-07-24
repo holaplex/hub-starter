@@ -13,7 +13,9 @@ import {
   TransferAssetPayload,
   TransferAssetInput,
   Blockchain,
-  AssetType
+  AssetType,
+  Collection,
+  Collectible
 } from '@/graphql.types';
 import { Session } from 'next-auth';
 import { MintNft } from '@/mutations/drop.graphql';
@@ -80,7 +82,7 @@ export const queryResolvers: QueryResolvers<AppContext> = {
 
     return data.project.drop as Drop;
   },
-  async dropPurchases(_a, _b, { dataSources: { holaplex } }) {
+  async collectible(_a, _b, { dataSources: { holaplex } }) {
     const { data } = await holaplex.query<GetDropData, GetDropVars>({
       fetchPolicy: 'network-only',
       query: GetProjectDropPurchases,
@@ -90,20 +92,7 @@ export const queryResolvers: QueryResolvers<AppContext> = {
       }
     });
 
-    return data.project.drop as Drop;
-  },
-  async me(_a, _b, { session, dataSources: { user } }) {
-    if (!session) {
-      return null;
-    }
-
-    const me = await user.get(session.user?.email);
-
-    if (me) {
-      return me;
-    }
-
-    return null;
+    return { mintHistory: data.project.drop?.purchases } as Collectible;
   },
   async collections(_a, _b, { session, dataSources: { holaplex, db } }) {
     if (!session) {
@@ -130,6 +119,19 @@ export const queryResolvers: QueryResolvers<AppContext> = {
     });
 
     return data.project.customer?.mints as [CollectionMint];
+  },
+  async me(_a, _b, { session, dataSources: { user } }) {
+    if (!session) {
+      return null;
+    }
+
+    const me = await user.get(session.user?.email);
+
+    if (me) {
+      return me;
+    }
+
+    return null;
   }
 };
 

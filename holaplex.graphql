@@ -86,6 +86,10 @@ type BlockchainCost {
   credits: Int!
 }
 
+type Collectible {
+  mintHistory: [Purchase]
+}
+
 type Collection {
   """
   The blockchain address of the collection used to view it in blockchain explorers.
@@ -1411,6 +1415,7 @@ type Purchase {
 }
 
 type Query {
+  collectible: Collectible
   collections: [CollectionMint]
 
   """
@@ -1421,7 +1426,6 @@ type Query {
   """
   creditSheet: [ActionCost!]!
   drop: Drop
-  dropPurchases: Drop
 
   """
   Returns a list of event types that an external service can subscribe to.
