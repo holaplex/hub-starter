@@ -10,6 +10,7 @@ mutation CreateCustomerWallet($input: CreateCustomerWalletInput!) {
   createCustomerWallet(input: $input) {
     wallet {
       address
+      assetId
     }
   }
 }

@@ -1,5 +1,6 @@
 #import Wallet from 'holaplex.graphql'
 #import CollectionMint from 'holaplex.graphql'
+#import Purchase from 'holaplex.graphql'
 #import Drop from 'holaplex.graphql'
 
 schema {
@@ -7,17 +8,22 @@ schema {
   mutation: Mutation
 }
 
-type User {
+type Me {
   name: String
   email: String
   image: String
-  wallet: Wallet
+  wallets: [Wallet]
+}
+
+type Collectible {
+  mintHistory: [Purchase]
 }
 
 type Query {
   drop: Drop
-  me: User
+  me: Me
   collections: [CollectionMint]
+  collectible: Collectible
 }
 
 type Mutation {

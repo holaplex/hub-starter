@@ -1,9 +1,11 @@
 query GetMe {
   me {
+    name
     email
     image
-    wallet {
+    wallets {
       address
+      assetId
     }
   }
 }

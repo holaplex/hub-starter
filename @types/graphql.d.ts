@@ -4,9 +4,10 @@ declare module '*/customer.graphql' {
   const defaultDocument: DocumentNode;
   export const CreateCustomer: DocumentNode;
 export const CreateCustomerWallet: DocumentNode;
-export const GetCustomerWallet: DocumentNode;
+export const GetCustomerWallets: DocumentNode;
 export const GetCustomerTreasury: DocumentNode;
 export const GetCustomerCollections: DocumentNode;
+export const GetCustomerWallet: DocumentNode;
 
   export default defaultDocument;
 }
@@ -41,6 +42,15 @@ declare module '*/transfer.graphql' {
 }
     
 
+declare module '*/collectible.graphql' {
+  import { DocumentNode } from 'graphql';
+  const defaultDocument: DocumentNode;
+  export const GetCollectibleHistory: DocumentNode;
+
+  export default defaultDocument;
+}
+    
+
 declare module '*/collections.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;
@@ -63,6 +73,7 @@ declare module '*/project.graphql' {
   import { DocumentNode } from 'graphql';
   const defaultDocument: DocumentNode;
   export const GetProjectDrop: DocumentNode;
+export const GetProjectDropPurchases: DocumentNode;
 
   export default defaultDocument;
 }

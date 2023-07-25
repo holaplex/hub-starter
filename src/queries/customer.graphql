@@ -1,16 +1,13 @@
-query GetCustomerWallet(
-  $project: UUID!
-  $customer: UUID!
-  $assetType: AssetType!
-) {
+query GetCustomerWallets($project: UUID!, $customer: UUID!) {
   project(id: $project) {
     id
     customer(id: $customer) {
       id
       treasury {
         id
-        wallet(assetType: $assetType) {
+        wallets {
           address
+          assetId
         }
       }
     }
@@ -39,12 +36,33 @@ query GetCustomerCollections($project: UUID!, $customer: UUID!) {
         collectionId
         createdAt
         creationStatus
+        collection {
+          id
+          blockchain
+        }
         metadataJson {
           id
           image
           name
           description
         }
+      }
+    }
+  }
+}
+
+query GetCustomerWallet(
+  $project: UUID!
+  $customer: UUID!
+  $assetId: AssetType
+) {
+  project(id: $project) {
+    id
+    customer(id: $customer) {
+      id
+      wallet(assetId: $assetId) {
+        address
+        assetId
       }
     }
   }

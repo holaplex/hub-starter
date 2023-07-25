@@ -86,6 +86,10 @@ type BlockchainCost {
   credits: Int!
 }
 
+type Collectible {
+  mintHistory: [Purchase]
+}
+
 type Collection {
   """
   The blockchain address of the collection used to view it in blockchain explorers.
@@ -97,6 +101,12 @@ type Collection {
   """The blockchain of the collection."""
   blockchain: Blockchain!
 
+  """The date and time in UTC when the collection was created."""
+  createdAt: DateTime!
+
+  """The user id of the person who created the collection."""
+  createdById: UUID!
+
   """
   The creation status of the collection. When the collection is in a `CREATED` status you can mint NFTs from the collection.
   """
@@ -104,6 +114,8 @@ type Collection {
 
   """The list of attributed creators for the collection."""
   creators: [CollectionCreator!]
+  creditsDeductionId: UUID
+  drop: Drop
 
   """The list of current holders of NFTs from the collection."""
   holders: [Holder!]
@@ -122,6 +134,7 @@ type Collection {
   The list of minted NFTs from the collection including the NFTs address and current owner's wallet address.
   """
   mints: [CollectionMint!]
+  projectId: UUID!
 
   """
   A list of all NFT purchases from the collection, including both primary and secondary sales.
@@ -152,22 +165,6 @@ type CollectionCreator {
   verified: Boolean!
 }
 
-"""An attributed creator for a colleciton."""
-input CollectionCreatorInput {
-  """The wallet address of the creator."""
-  address: String!
-
-  """The share of royalties payout the creator should receive."""
-  share: Int!
-
-  """
-  This field indicates whether the collection's creator has been verified. This feature is only supported on the Solana blockchain.
-  ## References
-  [Metaplex Token Metadata - Verify creator instruction](https://docs.metaplex.com/programs/token-metadata/instructions#verify-a-creator)
-  """
-  verified: Boolean
-}
-
 """Represents a single NFT minted from a collection."""
 type CollectionMint {
   """
@@ -182,6 +179,11 @@ type CollectionMint {
 
   """The ID of the collection the NFT was minted from."""
   collectionId: UUID!
+
+  """
+  Indicates if the NFT is compressed. Compression is only supported on Solana.
+  """
+  compressed: Boolean!
 
   """The date and time when the NFT was created."""
   createdAt: DateTime!
@@ -215,6 +217,17 @@ type CollectionMint {
 
   """The transaction signature associated with the NFT."""
   signature: String
+}
+
+input CreateCollectionInput {
+  blockchain: Blockchain!
+  creators: [CreatorInput!]!
+  metadataJson: MetadataJsonInput!
+  project: UUID!
+}
+
+type CreateCollectionPayload {
+  collection: Collection!
 }
 
 """
@@ -277,7 +290,7 @@ type CreateCustomerWalletPayload {
 
 input CreateDropInput {
   blockchain: Blockchain!
-  creators: [CollectionCreatorInput!]!
+  creators: [CreatorInput!]!
   endTime: DateTime
   metadataJson: MetadataJsonInput!
   price: Int
@@ -340,6 +353,22 @@ enum CreationStatus {
   FAILED
   PENDING
   REJECTED
+}
+
+"""An attributed creator for a collection or mint."""
+input CreatorInput {
+  """The wallet address of the creator."""
+  address: String!
+
+  """The share of royalties payout the creator should receive."""
+  share: Int!
+
+  """
+  This field indicates whether the creator has been verified. This feature is only supported on the Solana blockchain.
+  ## References
+  [Metaplex Token Metadata - Verify creator instruction](https://docs.metaplex.com/programs/token-metadata/instructions#verify-a-creator)
+  """
+  verified: Boolean
 }
 
 """
@@ -707,6 +736,13 @@ enum InviteStatus {
 """A scalar that can represent any JSON value."""
 scalar JSON
 
+type Me {
+  email: String
+  image: String
+  name: String
+  wallets: [Wallet]
+}
+
 """
 A member of a Holaplex organization, representing an individual who has been granted access to the organization.
 """
@@ -847,6 +883,19 @@ type MintEditionPayload {
   collectionMint: CollectionMint!
 }
 
+input MintToCollectionInput {
+  collection: UUID!
+  compressed: Boolean!
+  creators: [CreatorInput!]!
+  metadataJson: MetadataJsonInput!
+  recipient: String!
+  sellerFeeBasisPoints: Int
+}
+
+type MintToCollectionPayload {
+  collectionMint: CollectionMint!
+}
+
 type Mutation {
   """
   Accept an invite to the organization.
@@ -854,6 +903,13 @@ type Mutation {
   This mutation will produce an error if it is unable to connect to the database or if the user's email does not match the invitation.
   """
   acceptInvite(input: AcceptInviteInput!): AcceptInvitePayload!
+
+  """
+  This mutation creates a new NFT drop and its associated collection. The drop returns immediately with a creation status of CREATING. You can [set up a webhook](https://docs.holaplex.dev/hub/For%20Developers/webhooks-overview) to receive a notification when the drop is ready to be minted.
+  Error
+  If the drop cannot be saved to the database or fails to be emitted for submission to the desired blockchain, the mutation will result in an error.
+  """
+  createCollection(input: CreateCollectionInput!): CreateCollectionPayload!
 
   """
   Create an API credential to authenticate and authorize API requests to the Holaplex Hub.
@@ -953,6 +1009,14 @@ type Mutation {
   If the mint cannot be saved to the database or fails to be emitted for submission to the desired blockchain, the mutation will result in an error.
   """
   mintEdition(input: MintDropInput!): MintEditionPayload!
+  mintToCollection(input: MintToCollectionInput!): MintToCollectionPayload!
+
+  """
+  This mutation allows updating a drop and it's associated collection by ID.
+  It returns an error if it fails to reach the database, emit update events or assemble the on-chain transaction.
+  Returns the `PatchDropPayload` object on success.
+  """
+  patchCollection(input: PatchCollectionInput!): PatchCollectionPayload!
 
   """
   This mutation allows updating a drop and it's associated collection by ID.
@@ -988,6 +1052,17 @@ type Mutation {
   if the transaction response cannot be built,
   or if the transaction event cannot be emitted.
   """
+  retryCollection(input: RetryCollectionInput!): CreateCollectionPayload!
+
+  """
+  This mutation retries an existing drop.
+  The drop returns immediately with a creation status of CREATING.
+  You can [set up a webhook](https://docs.holaplex.dev/hub/For%20Developers/webhooks-overview) to receive a notification when the drop is ready to be minted.
+  Errors
+  The mutation will fail if the drop and its related collection cannot be located,
+  if the transaction response cannot be built,
+  or if the transaction event cannot be emitted.
+  """
   retryDrop(input: RetryDropInput!): CreateDropPayload!
 
   """
@@ -995,7 +1070,8 @@ type Mutation {
   # Errors
   If the mint cannot be saved to the database or fails to be emitted for submission to the desired blockchain, the mutation will result in an error.
   """
-  retryMint(input: RetryMintInput!): RetryMintPayload!
+  retryMintEdition(input: RetryMintEditionInput!): RetryMintEditionPayload!
+  retryMintToCollection(input: RetryMintEditionInput!): RetryMintEditionPayload!
 
   """
   Shuts down a drop by writing the current UTC timestamp to the shutdown_at field of drop record.
@@ -1200,9 +1276,27 @@ type Owner {
 }
 
 """Input object for patching a drop and associated collection by ID"""
+input PatchCollectionInput {
+  """The creators of the drop"""
+  creators: [CreatorInput!]
+
+  """The unique identifier of the drop"""
+  id: UUID!
+
+  """The new metadata JSON for the drop"""
+  metadataJson: MetadataJsonInput
+}
+
+"""Represents the result of a successful patch drop mutation."""
+type PatchCollectionPayload {
+  """The drop that has been patched."""
+  collection: Collection!
+}
+
+"""Input object for patching a drop and associated collection by ID"""
 input PatchDropInput {
   """The creators of the drop"""
-  creators: [CollectionCreatorInput!]
+  creators: [CreatorInput!]
 
   """The new end time for the drop in UTC"""
   endTime: DateTime
@@ -1244,6 +1338,11 @@ type PauseDropPayload {
 A Holaplex project that belongs to an organization. Projects are used to group unique NFT campaigns or initiatives, and are used to assign objects that end customers will interact with, such as drops and wallets.
 """
 type Project {
+  collection(id: UUID!): Collection
+
+  """The collections associated with the project."""
+  collections: [Collection!]
+
   """The datetime, in UTC, when the project was created."""
   createdAt: DateTime!
 
@@ -1316,6 +1415,7 @@ type Purchase {
 }
 
 type Query {
+  collectible: Collectible
   collections: [CollectionMint]
 
   """
@@ -1342,7 +1442,7 @@ type Query {
 
   """Retrieve a member invitation by its ID."""
   invite(id: UUID!): Invite
-  me: User
+  me: Me
 
   """
   Query an organization by its ID, this query returns `null` if the organization does not exist.
@@ -1373,6 +1473,10 @@ type ResumeDropPayload {
   drop: Drop!
 }
 
+input RetryCollectionInput {
+  id: UUID!
+}
+
 input RetryDropInput {
   drop: UUID!
 }
@@ -1380,12 +1484,12 @@ input RetryDropInput {
 """
 Represents input data for `retry_mint` mutation with an ID as a field of type UUID
 """
-input RetryMintInput {
+input RetryMintEditionInput {
   id: UUID!
 }
 
 """Represents payload data for `retry_mint` mutation"""
-type RetryMintPayload {
+type RetryMintEditionPayload {
   collectionMint: CollectionMint!
 }
 
@@ -1462,18 +1566,15 @@ type User {
 
   """The unique identifier for the user identity."""
   id: UUID!
-  image: String
 
   """The last name of the user identity."""
   lastName: String!
-  name: String
 
   """The profile image associated with the user identity."""
   profileImage: String
 
   """The timestamp in UTC when the user identity was last updated."""
   updatedAt: String!
-  wallet: Wallet
 }
 
 """

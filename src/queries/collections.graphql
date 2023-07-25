@@ -4,6 +4,10 @@ query GetCollections {
     collectionId
     createdAt
     creationStatus
+    collection {
+      id
+      blockchain
+    }
     metadataJson {
       id
       image

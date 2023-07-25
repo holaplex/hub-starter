@@ -46,15 +46,8 @@ model User {
   holaplexCustomerId String?   @unique @db.Uuid
   accounts           Account[]
   sessions           Session[]
-  wallets            Wallet[]
 }
 
-model Wallet {
-  id                 String @id @default(cuid())
-  holaplexCustomerId String @db.Uuid
-  user               User   @relation(fields: [holaplexCustomerId], references: [holaplexCustomerId], onDelete: Cascade)
-  address            String
-}
 
 model VerificationToken {
   identifier String

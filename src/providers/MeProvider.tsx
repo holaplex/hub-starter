@@ -1,17 +1,17 @@
-import { createContext } from "react";
-import { User } from "@/graphql.types";
+import { createContext } from 'react';
+import { Me } from '../graphql.types';
 
 interface MeContext {
-  me: User | undefined;
+  me: Me | undefined;
 }
 
 export const MeContext = createContext<MeContext>({ me: undefined });
 
 export default function MeProvider({
   me,
-  children,
+  children
 }: {
-  me: User | undefined;
+  me: Me | undefined;
   children: React.ReactNode;
 }) {
   return <MeContext.Provider value={{ me }}>{children}</MeContext.Provider>;

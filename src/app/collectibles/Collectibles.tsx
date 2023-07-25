@@ -1,13 +1,14 @@
 'use client';
 import { useQuery } from '@apollo/client';
-import { CollectionMint, CreationStatus } from '../../graphql.types';
+import { AssetType, CollectionMint, CreationStatus } from '../../graphql.types';
 import { GetCollections } from '@/queries/collections.graphql';
 import { shorten } from '../../modules/wallet';
 import Copy from '../../components/Copy';
 import { signOut } from 'next-auth/react';
 import useMe from '../../hooks/useMe';
 import Link from 'next/link';
-import { XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import CryptoIcon from '../../components/CryptoIcon';
 
 interface GetCollectionsData {
   collections: [CollectionMint];
@@ -33,12 +34,24 @@ export default function Collectibles() {
         <div className='flex flex-col gap-1 items-center'>
           <img className='w-20 h-20 rounded-full' src={me?.image as string} />
           <div className='mt-6'>
-            <span className='text-xs text-neautraltext'>Wallet address</span>
-            <div className='flex gap-2 mt-1'>
-              <span className='text-xs font-medium'>
-                {shorten(me?.wallet?.address as string)}
-              </span>
-              <Copy copyString={me?.wallet?.address as string} />
+            <span className='text-xs text-neautraltext'>Wallet addresses</span>
+            <div className='flex flex-col gap-2 mt-4 items-center'>
+              {me?.wallets?.map((wallet) => {
+                return (
+                  <div
+                    key={wallet?.address}
+                    className='flex gap-2 items-center'
+                  >
+                    <div className='flex items-center'>
+                      <CryptoIcon assetType={wallet?.assetId as AssetType} />
+                      <span className='text-xs'>
+                        {shorten(wallet?.address as string)}
+                      </span>
+                    </div>
+                    <Copy copyString={wallet?.address as string} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
