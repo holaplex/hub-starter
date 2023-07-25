@@ -20,8 +20,9 @@ services:
         sync: false
       - key: NEXTAUTH_SECRET
         generateValue: true
-      - key: HOLAPLEX_WALLET_ASSET_TYPE
+      - key: HOLAPLEX_WALLET_ASSET_TYPES
         value: SOL
+        sync: false
       - key: HOLAPLEX_API_ENDPOINT
         value: https://api.holaplex.com/graphql
       - key: DATABASE_URL

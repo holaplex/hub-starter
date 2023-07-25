@@ -14,7 +14,6 @@ import {
   TransferAssetInput,
   Blockchain,
   AssetType,
-  Collection,
   Collectible
 } from '@/graphql.types';
 import { Session } from 'next-auth';

@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Me } from '../modules/user';
+import { Me } from '../graphql.types';
 
 interface MeContext {
   me: Me | undefined;

@@ -1,23 +1,23 @@
-'use client';
-import Image from 'next/image';
-import { useMemo } from 'react';
-import { AssetType, CollectionMint, Purchase } from '@/graphql.types';
-import { shorten } from '../modules/wallet';
-import { MintDrop } from '@/mutations/mint.graphql';
-import { ApolloError, useMutation, useQuery } from '@apollo/client';
-import { GetDrop } from '@/queries/drop.graphql';
-import { GetCollectibleHistory } from '@/queries/collectible.graphql';
+"use client";
+import Image from "next/image";
+import { useMemo } from "react";
+import { AssetType, CollectionMint, Purchase } from "@/graphql.types";
+import { shorten } from "../modules/wallet";
+import { MintDrop } from "@/mutations/mint.graphql";
+import { ApolloError, useMutation, useQuery } from "@apollo/client";
+import { GetDrop } from "@/queries/drop.graphql";
+import { GetCollectibleHistory } from "@/queries/collectible.graphql";
 
-import Link from 'next/link';
-import { isNil, not, pipe } from 'ramda';
-import useMe from '@/hooks/useMe';
-import { Session } from 'next-auth';
-import { toast } from 'react-toastify';
-import { PopoverBox } from '../components/Popover';
-import { Icon } from '../components/Icon';
-import { signOut } from 'next-auth/react';
-import Copy from '../components/Copy';
-import CryptoIcon from '../components/CryptoIcon';
+import Link from "next/link";
+import { isNil, not, pipe } from "ramda";
+import useMe from "@/hooks/useMe";
+import { Session } from "next-auth";
+import { toast } from "react-toastify";
+import { PopoverBox } from "../components/Popover";
+import { Icon } from "../components/Icon";
+import { signOut } from "next-auth/react";
+import Copy from "../components/Copy";
+import CryptoIcon from "../components/CryptoIcon";
 
 interface MintData {
   mint: CollectionMint;
@@ -47,41 +47,46 @@ export default function Home({ session }: HomeProps) {
     awaitRefetchQueries: true,
     refetchQueries: [
       {
-        query: GetDrop
-      }
-    ]
+        query: GetDrop,
+      },
+      {
+        query: GetCollectibleHistory,
+      },
+    ],
   });
 
   const onMint = () => {
     mint({
       onCompleted: (data: MintData) => {
-        toast.success('Mint successful');
+        toast.success("Mint successful");
       },
       onError: (error: ApolloError) => {
         toast.error(
-          'Unable to mint. Please try again or reach out to support.'
+          "Unable to mint. Please try again or reach out to support."
         );
-      }
+      },
     });
   };
 
+  const loadingQueries = dropQuery.loading || mintHistoryQuery.loading;
+
   return (
     <>
-      <header className='flex w-full justify-between items-center py-4'>
-        <Image src='/img/logo.png' alt='site logo' width={199} height={18} />
+      <header className="flex w-full justify-between items-center py-4">
+        <Image src="/img/logo.png" alt="site logo" width={199} height={18} />
         {!me ? (
           <>
-            <div className='flex gap-1 md:gap-4 items-center'>
+            <div className="flex gap-1 md:gap-4 items-center">
               <Link
-                href='/login'
-                className='text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6'
+                href="/login"
+                className="text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6"
               >
                 Log in
               </Link>
-              <span className='text-gray-300 font-medium md:hidden'>or</span>
+              <span className="text-gray-300 font-medium md:hidden">or</span>
               <Link
-                href='/login'
-                className='text-cta font-medium md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6'
+                href="/login"
+                className="text-cta font-medium md:text-backdrop md:bg-cta md:rounded-full md:font-bold md:py-3 md:px-6"
               >
                 Sign up
               </Link>
@@ -90,31 +95,31 @@ export default function Home({ session }: HomeProps) {
         ) : (
           <PopoverBox
             triggerButton={
-              <button className='text-cta font-bold border-2 rounded-full border-cta py-3 px-6 flex gap-2 items-center'>
+              <button className="text-cta font-bold border-2 rounded-full border-cta py-3 px-6 flex gap-2 items-center">
                 <img
-                  className='w-6 h-6 rounded-full'
+                  className="w-6 h-6 rounded-full"
                   src={me?.image as string}
                 />
                 <span>{me?.name}</span>
-                <Icon.ChevronDown className='stroke-cta' />
+                <Icon.ChevronDown className="stroke-cta" />
               </button>
             }
           >
-            <div className='rounded-lg bg-contrast p-6 flex flex-col items-center mt-4'>
-              <span className='text-xs text-gray-300 underline'>
+            <div className="rounded-lg bg-contrast p-6 flex flex-col items-center mt-4">
+              <span className="text-xs text-gray-300 underline">
                 Wallet addresses
               </span>
 
-              <div className='flex flex-col gap-2 mt-4 items-center'>
+              <div className="flex flex-col gap-2 mt-4 items-center">
                 {me?.wallets?.map((wallet) => {
                   return (
                     <div
                       key={wallet?.address}
-                      className='flex gap-2 items-center'
+                      className="flex gap-2 items-center"
                     >
-                      <div className='flex items-center'>
+                      <div className="flex items-center">
                         <CryptoIcon assetType={wallet?.assetId as AssetType} />
-                        <span className='text-xs'>
+                        <span className="text-xs">
                           {shorten(wallet?.address as string)}
                         </span>
                       </div>
@@ -125,7 +130,7 @@ export default function Home({ session }: HomeProps) {
               </div>
               <button
                 onClick={() => signOut()}
-                className='text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6 mt-6'
+                className="text-cta font-medium md:font-bold md:border-2 md:rounded-full md:border-cta md:py-3 md:px-6 mt-6"
               >
                 Log out
               </button>
@@ -133,84 +138,84 @@ export default function Home({ session }: HomeProps) {
           </PopoverBox>
         )}
       </header>
-      <main className='w-full grid grid-cols-12 md:gap-20 mt-6 md:mt-10 lg:mt-16'>
+      <main className="w-full grid grid-cols-12 md:gap-20 mt-6 md:mt-10 lg:mt-16">
         {/* Name & description on small screens */}
-        <div className='flex flex-col md:hidden items-center col-span-12 mb-6'>
-          {dropQuery.loading ? (
+        <div className="flex flex-col md:hidden items-center col-span-12 mb-6">
+          {loadingQueries ? (
             <>
-              <div className='rounded-full bg-contrast w-60 h-6 animate-pulse' />
-              <div className='flex flex-col gap-2 w-full mt-6 md:mt-3'>
-                <div className='rounded-full bg-contrast w-full h-4 animate-pulse' />
-                <div className='rounded-full bg-contrast w-full h-4 animate-pulse' />
+              <div className="rounded-full bg-contrast w-60 h-6 animate-pulse" />
+              <div className="flex flex-col gap-2 w-full mt-6 md:mt-3">
+                <div className="rounded-full bg-contrast w-full h-4 animate-pulse" />
+                <div className="rounded-full bg-contrast w-full h-4 animate-pulse" />
               </div>
             </>
           ) : (
             <>
-              <span className='text-2xl font-extrabold'>
+              <span className="text-2xl font-extrabold">
                 {metadataJson?.name}
               </span>
-              <span className='text-base font-medium text-gray-300 text-center mt-6'>
+              <span className="text-base font-medium text-gray-300 text-center mt-6">
                 {metadataJson?.description}
               </span>
             </>
           )}
         </div>
-        <div className='col-span-12 md:col-span-6'>
-          {dropQuery.loading ? (
-            <div className='w-full aspect-square rounded-lg bg-contrast animate-pulse' />
+        <div className="col-span-12 md:col-span-6">
+          {loadingQueries ? (
+            <div className="w-full aspect-square rounded-lg bg-contrast animate-pulse" />
           ) : (
             <img
               src={metadataJson?.image as string}
               alt={metadataJson?.name as string}
-              className='w-full object-cover aspect-square rounded-lg'
+              className="w-full object-cover aspect-square rounded-lg"
             />
           )}
         </div>
-        <div className='col-span-12 md:col-span-6 self-center'>
+        <div className="col-span-12 md:col-span-6 self-center">
           {/* Name & description on md and above */}
-          <div className='hidden md:flex md:flex-col items-center md:items-start md:justify-center '>
-            {dropQuery.loading ? (
+          <div className="hidden md:flex md:flex-col items-center md:items-start md:justify-center ">
+            {loadingQueries ? (
               <>
-                <div className='rounded-full bg-contrast w-60 h-6 animate-pulse' />
-                <div className='flex flex-col gap-2 w-full mt-6 md:mt-3'>
-                  <div className='rounded-full bg-contrast w-full h-4 animate-pulse' />
-                  <div className='rounded-full bg-contrast w-full h-4 animate-pulse' />
-                  <div className='rounded-full bg-contrast w-28 h-4 animate-pulse' />
+                <div className="rounded-full bg-contrast w-60 h-6 animate-pulse" />
+                <div className="flex flex-col gap-2 w-full mt-6 md:mt-3">
+                  <div className="rounded-full bg-contrast w-full h-4 animate-pulse" />
+                  <div className="rounded-full bg-contrast w-full h-4 animate-pulse" />
+                  <div className="rounded-full bg-contrast w-28 h-4 animate-pulse" />
                 </div>
               </>
             ) : (
               <>
-                <span className='text-2xl font-extrabold md:text-xl lg:text-3xl md:font-semibold'>
+                <span className="text-2xl font-extrabold md:text-xl lg:text-3xl md:font-semibold">
                   {metadataJson?.name}
                 </span>
-                <span className='text-base font-medium text-gray-300 mt-6 md:mt-3 text-center md:text-left'>
+                <span className="text-base font-medium text-gray-300 mt-6 md:mt-3 text-center md:text-left">
                   {metadataJson?.description}
                 </span>
               </>
             )}
           </div>
-          <div className='bg-contrast rounded-lg p-6 flex justify-between mt-8 items-center mb-6'>
-            {dropQuery.loading ? (
+          <div className="bg-contrast rounded-lg p-6 flex justify-between mt-8 items-center mb-6">
+            {loadingQueries ? (
               <>
-                <div className='flex flex-row gap-2 items-center'>
-                  <div className='bg-backdrop w-14 aspect-square rounded-full animate-pulse' />
-                  <div className='flex flex-col gap-1 justify-between'>
-                    <div className='h-4 w-24 rounded-full bg-backdrop animate-pulse' />
-                    <div className='h-6 w-16 rounded-full bg-backdrop animate-pulse' />
+                <div className="flex flex-row gap-2 items-center">
+                  <div className="bg-backdrop w-14 aspect-square rounded-full animate-pulse" />
+                  <div className="flex flex-col gap-1 justify-between">
+                    <div className="h-4 w-24 rounded-full bg-backdrop animate-pulse" />
+                    <div className="h-6 w-16 rounded-full bg-backdrop animate-pulse" />
                   </div>
                 </div>
-                <div className='font-bold rounded-full bg-backdrop w-32 h-12 transition animate-pulse' />
+                <div className="font-bold rounded-full bg-backdrop w-32 h-12 transition animate-pulse" />
               </>
             ) : session ? (
               purchased ? (
-                <div className='flex flex-row w-full items-center gap-2 justify-between'>
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-neautraltext font-semibold'>
+                <div className="flex flex-row w-full items-center gap-2 justify-between">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-neautraltext font-semibold">
                       NFT claimed!
                     </span>
                     <Link
-                      href='/collectibles'
-                      className='font-semibold text-white underline cursor-pointer'
+                      href="/collectibles"
+                      className="font-semibold text-white underline cursor-pointer"
                     >
                       View in your wallet
                     </Link>
@@ -219,23 +224,23 @@ export default function Home({ session }: HomeProps) {
                 </div>
               ) : (
                 <>
-                  <div className='flex flex-row items-center gap-2'>
+                  <div className="flex flex-row items-center gap-2">
                     <img
-                      className='w-14 h-14 rounded-full'
+                      className="w-14 h-14 rounded-full"
                       src={session?.user?.image as string}
                     />
 
-                    <div className='flex flex-col gap-1 justify-between'>
-                      <span className='text-gray-300 text-xs mb-1'>
+                    <div className="flex flex-col gap-1 justify-between">
+                      <span className="text-gray-300 text-xs mb-1">
                         Wallets connected
                       </span>
                       {me?.wallets?.map((wallet) => {
                         return (
-                          <div key={wallet?.address} className='flex'>
+                          <div key={wallet?.address} className="flex">
                             <CryptoIcon
                               assetType={wallet?.assetId as AssetType}
                             />
-                            <span className='text-sm'>
+                            <span className="text-sm">
                               {shorten(wallet?.address as string)}
                             </span>
                           </div>
@@ -245,7 +250,7 @@ export default function Home({ session }: HomeProps) {
                   </div>
 
                   <button
-                    className='font-bold rounded-full bg-cta text-contrast py-3 px-6 transition hover:opacity-80'
+                    className="font-bold rounded-full bg-cta text-contrast py-3 px-6 transition hover:opacity-80"
                     onClick={onMint}
                     disabled={loading}
                   >
@@ -255,12 +260,12 @@ export default function Home({ session }: HomeProps) {
               )
             ) : (
               <>
-                <span className='text-xs md:text-base text-gray-300'>
+                <span className="text-xs md:text-base text-gray-300">
                   Sign up to claim your NFT
                 </span>
                 <Link
-                  href='/login'
-                  className='font-bold rounded-full bg-cta text-contrast py-3 px-6 transition hover:opacity-80'
+                  href="/login"
+                  className="font-bold rounded-full bg-cta text-contrast py-3 px-6 transition hover:opacity-80"
                 >
                   Claim now
                 </Link>
